@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#c2553a">
+<meta name="app-version" content="__APP_VERSION__">
+<title>Notification tester</title>
+<link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
+<link rel="icon" href="/static/icon-192.png">
+<link rel="stylesheet" href="/static/style.css">
+<script type="module" src="/static/phone.js"></script>
+</head>
+<body>
+<main>
+  <header>
+    <h1>This device</h1>
+    <a href="/send">Send page</a>
+  </header>
+
+  <dl class="status" id="status">
+    <dt>Permission</dt><dd id="status-permission"><span class="dot off"></span>Checking...</dd>
+    <dt>Push</dt><dd id="status-push"><span class="dot off"></span>Checking...</dd>
+    <dt>Live connection</dt><dd id="status-live"><span class="dot off"></span>Connecting...</dd>
+    <dt>Buttons in notifications</dt><dd id="status-buttons"><span class="dot off"></span>Checking...</dd>
+    <dt>App version</dt><dd id="status-version"><span class="dot off"></span>Checking...</dd>
+    <dt>Installed</dt><dd id="status-installed"><span class="dot off"></span>Checking...</dd>
+  </dl>
+  <p class="hint" id="hint" hidden></p>
+
+  <label for="device-name">Device name (shown on the Send page)</label>
+  <input id="device-name" type="text" maxlength="100">
+
+  <div class="actions">
+    <button class="primary" id="allow-button">Allow notifications</button>
+    <button id="install-button" hidden>Install as app</button>
+    <button id="local-test-button">Test on this device only</button>
+    <button id="clear-badge-button">Clear app badge</button>
+    <button id="sign-out-button" hidden>Sign this device out</button>
+  </div>
+
+  <h2>Received</h2>
+  <ul class="log" id="received"><li class="empty">Nothing sent to this device yet. Open the Send page on another screen and send one.</li></ul>
+
+  <h2>What this page did</h2>
+  <ul class="log events" id="events"></ul>
+</main>
+</body>
+</html>

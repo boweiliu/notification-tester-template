@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#c2553a">
+<meta name="app-version" content="__APP_VERSION__">
+<title>Reply</title>
+<link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
+<link rel="icon" href="/static/icon-192.png">
+<link rel="stylesheet" href="/static/style.css">
+<script type="module" src="/static/reply.js"></script>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Reply</h1>
+    <a href="/">This device</a>
+  </header>
+  <p id="original" class="meta">Loading the notification...</p>
+  <label for="reply-text">Your reply</label>
+  <textarea id="reply-text" maxlength="2000" autofocus></textarea>
+  <div class="actions"><button class="primary" id="reply-button">Send reply</button></div>
+  <p class="meta" id="reply-status"></p>
+</main>
+</body>
+</html>

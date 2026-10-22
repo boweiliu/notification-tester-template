@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#c2553a">
+<meta name="app-version" content="__APP_VERSION__">
+<title>Send a notification</title>
+<link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
+<link rel="icon" href="/static/icon-192.png">
+<link rel="stylesheet" href="/static/style.css">
+<script type="module" src="/static/send.js"></script>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Send a notification</h1>
+    <a href="/">This device</a>
+  </header>
+
+  <h2>Devices</h2>
+  <ul class="devices" id="devices"><li class="empty">Loading...</li></ul>
+
+  <h2>Message</h2>
+  <label for="title">Title</label>
+  <input id="title" type="text" maxlength="200" value="Test notification">
+  <label for="body">Message</label>
+  <textarea id="body" maxlength="1000">Sent from the notification tester</textarea>
+
+  <label for="style">Style</label>
+  <select id="style"></select>
+  <p class="meta" id="style-description"></p>
+
+  <div class="row" style="margin-top:14px">
+    <div>
+      <label>Delivery</label>
+      <div class="segmented" id="delivery">
+        <label><input type="radio" name="via" value="push" checked><span>Push</span></label>
+        <label><input type="radio" name="via" value="live"><span>Live</span></label>
+        <label><input type="radio" name="via" value="both"><span>Both</span></label>
+      </div>
+    </div>
+    <div>
+      <label>When</label>
+      <div class="segmented" id="when">
+        <label><input type="radio" name="when" value="0" checked><span>Now</span></label>
+        <label><input type="radio" name="when" value="10"><span>In 10 s</span></label>
+        <label><input type="radio" name="when" value="30"><span>In 30 s</span></label>
+      </div>
+    </div>
+  </div>
+  <div class="actions"><button class="primary" id="send-button">Send</button></div>
+  <p class="meta" id="send-error"></p>
+
+  <h2>Chat notifications</h2>
+  <div class="row" id="chat-forwarding">
+    <label class="check"><input type="checkbox" id="chat-forwarding-enabled"> Copy every notification your chats send you to all devices here</label>
+    <div class="segmented" id="chat-forwarding-via">
+      <label><input type="radio" name="chat-via" value="push"><span>Push</span></label>
+      <label><input type="radio" name="chat-via" value="live"><span>Live</span></label>
+      <label><input type="radio" name="chat-via" value="both"><span>Both</span></label>
+    </div>
+  </div>
+  <p class="meta" id="chat-forwarding-status"></p>
+
+  <details id="device-activity">
+    <summary>Device activity</summary>
+    <ul class="log events" id="device-log"></ul>
+  </details>
+
+  <h2>Sent</h2>
+  <ul class="log" id="sent"><li class="empty">Nothing sent yet.</li></ul>
+</main>
+</body>
+</html>

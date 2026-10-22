@@ -316,9 +316,63 @@ def test_requires_a_runtime_agent_id(capsys: pytest.CaptureFixture[str]) -> None
     assert "did not go out" in stderr
 
 
-def test_main_exit_code_follows_acceptance(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_main_exit_code_follows_acceptance(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
     for key, value in _GATEWAY_ENV.items():
         monkeypatch.setenv(key, value)
+    # An empty registry, so the run never copies to a real notification tester.
+    (tmp_path / "apps.toml").write_text("")
+    monkeypatch.setenv("MINDS_APPS_FILE", str(tmp_path / "apps.toml"))
     monkeypatch.setenv("LATCHKEY_GATEWAY", "http://127.0.0.1:1")  # nothing listens here
 
     assert notify_user.main(["Done."]) == 1
+
+
+def _env_with_notification_tester(tmp_path: Path) -> dict[str, str]:
+    registry = tmp_path / "apps.toml"
+    registry.write_text(
+        '[[apps]]\nname = "notification-tester"\nurl = "http://127.0.0.1:18732/"\n'
+    )
+    return {**_GATEWAY_ENV, "MINDS_APPS_FILE": str(registry)}
+
+
+def test_copies_the_notification_to_the_notification_tester(tmp_path: Path) -> None:
+    http = _RecordingHttp(201)
+
+    notify_user.copy_to_notification_tester(
+        " Done. ", "Report", http=http, environ=_env_with_notification_tester(tmp_path)
+    )
+
+    assert http.posts == [
+        (
+            "http://127.0.0.1:18732/api/chat-notifications",
+            {"message": "Done.", "chat_id": "agent-chat", "title": "Report"},
+            {"Content-Type": "application/json"},
+        )
+    ]
+
+
+def test_copies_nothing_when_the_notification_tester_is_not_registered(
+    environ: dict[str, str],
+) -> None:
+    http = _RecordingHttp(201)
+
+    notify_user.copy_to_notification_tester("Done.", None, http=http, environ=environ)
+
+    assert http.posts == []
+
+
+def test_a_failed_copy_only_warns(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    http = _RecordingHttp(None, "connection refused")
+
+    notify_user.copy_to_notification_tester(
+        "Done.", None, http=http, environ=_env_with_notification_tester(tmp_path)
+    )
+
+    assert (
+        "could not copy the notification to the notification tester (connection refused)"
+        in capsys.readouterr().err
+    )

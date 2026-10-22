@@ -1,0 +1,88 @@
+# Machine-readable manifest for this template. The sibling
+# template.md holds the prose, the Requirements list, and the two
+# append-only history logs; this file is authoritative for everything
+# below. Both are generated together -- validate_template.py fails if
+# they disagree.
+format = "v2"
+
+[template]
+slug = "notification-tester-template"
+title = "Notification tester"
+description = "Test phone and desktop Web Push and Live notifications, rich actions, browser support and delivery diagnostics"
+thumbnail = "template.svg"
+version = "v1"
+
+# How this template is DERIVED from the workspace it came from. An
+# update re-runs this recipe rather than diffing two repos, which is what
+# keeps an exclusion excluded even though the thing still exists upstream.
+[recipe]
+include = ["system/apps/notification_tester", "system/supervisord.conf.d/notification-tester.conf", ".agents/skills/notify-user/scripts/notify_user.py", ".agents/skills/notify-user/scripts/notify_user_test.py"]
+data_include = []
+# Deliberate exclusions: what a reader might expect to ship but does not.
+exclude = [
+    "the app's runtime data folder: device subscriptions, send history, activity log, chat-copy settings and the generated signing key (each workspace creates its own on first start)",
+    "every other app, skill, service and shared script of the source workspace: only the four included paths ship",
+]
+# No published-version modifications: the included files ship as they are in the source.
+modification_rules = []
+
+# Everything an adopter must deal with before this is really theirs.
+# One list -- but each entry's KIND says how it is handled, because the
+# two are handled at different times by different mechanisms:
+#
+#   permission / secret / llm = ACTIVATION. The adopting agent acts on
+#   these FIRST and BY ITSELF, initiating each latchkey permission
+#   request and each secret request before asking the user anything.
+#   Every one of them must have a matching requires_ line in template.md
+#   and vice versa -- the validator checks that, because an adopter once
+#   never got prompted for a permission the app needed.
+#
+#   The [[requirements.secret]] entries below were AGGREGATED from the
+#   included apps' app.toml [[secrets]] and skills' SKILL.md secrets:
+#   declarations, plus every data/.secrets/<file>.env the snapshot's
+#   mcp-servers.json and supervisord programs run under. Fix a wrong one
+#   at its declaration, not here.
+#
+#   adaptation = worked through INTERACTIVELY with the user afterwards.
+#   Prose on both sides, so it is not cross-checked.
+#
+# The shapes an entry can take, e.g.:
+#   [[requirements.permission]]
+#   scope = "slack-api"
+#   permission = "slack-read-all"
+#
+#   [requirements.llm]
+#   method = "keyed"   # keyed (an API key, e.g. ANTHROPIC_API_KEY) | keyless (a subscription CLI, e.g. claude -p)
+#
+#   [[requirements.adaptation]]
+#   summary = "the digest channel is hardcoded"
+#   resolution = "ask the user which channel to watch"
+[requirements]
+
+[[requirements.adaptation]]
+summary = "The app's command is only installed at workspace build time; a workspace that merged this template into an existing one has the files but no command"
+resolution = "run bash system/apps/notification_tester/install.sh --studio-root <workspace root> once from the workspace root (add --port to move off 8080); it installs the command, syncs packages, starts the service and checks /health without opening a window"
+
+[[requirements.adaptation]]
+summary = "Devices need an HTTPS address and the user's Studio sign-in before they can register or receive notifications"
+resolution = "have the user share the app through Studio sharing, open the share link directly on each device (not inside the Studio window), sign in, and add it to the Home Screen where the platform requires it"
+
+[[requirements.adaptation]]
+summary = "Chat notifications are copied to every registered device by default, on both channels"
+resolution = "ask the user whether to keep that, change the channel or turn it off on the sender page"
+
+[[requirements.adaptation]]
+summary = "The included notify-user script is the version this template was built on plus the copy step; the adopting workspace's own copy may have moved on"
+resolution = "if it differs, add the small copy_to_notification_tester step to the newer script instead of overwriting it; install.sh --enable-chat-forwarding can add it to a recognised notifier"
+
+[[requirements.adaptation]]
+summary = "The service definition registers the app on port 8080, which another program in the adopting workspace may already use"
+resolution = "reinstall with install.sh --port <free port> so the service definition is regenerated on a free port"
+
+# What the included code needs INSTALLED. Nothing beyond the stock workspace
+# environment: the app's Python packages (pywebpush, flask-sock) are pinned in
+# uv.lock and installed with the app's own command, and it shells out to no
+# binary, global tool or env.d unit.
+[environment]
+apt = []
+env_d_units = []
