@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="160" viewBox="0 0 240 160" role="img" aria-label="A phone and a desktop each showing a notification, connected to a server by a Live path and a Push path">
+  <rect width="240" height="160" rx="14" fill="#FBF3E2"/>
+
+  <!-- phone with a notification card, two action buttons and a fainter second card -->
+  <rect x="14" y="20" width="62" height="118" rx="10" fill="#2B2623"/>
+  <rect x="19" y="28" width="52" height="102" rx="5" fill="#FCEFD4"/>
+  <rect x="25" y="40" width="40" height="44" rx="5" fill="#FFFFFF" stroke="#E4D7BB"/>
+  <circle cx="33" cy="49" r="4" fill="#D26645"/>
+  <rect x="40" y="47" width="20" height="3" rx="1.5" fill="#2B2623"/>
+  <rect x="29" y="57" width="32" height="2.5" rx="1.25" fill="#BDB09A"/>
+  <rect x="29" y="63" width="26" height="2.5" rx="1.25" fill="#BDB09A"/>
+  <rect x="29" y="72" width="16" height="7" rx="3.5" fill="#D26645"/>
+  <rect x="48" y="72" width="13" height="7" rx="3.5" fill="#E9DCC0"/>
+  <rect x="25" y="92" width="40" height="22" rx="5" fill="#FFFFFF" fill-opacity="0.6" stroke="#E4D7BB"/>
+  <circle cx="33" cy="99" r="3" fill="#D26645" fill-opacity="0.6"/>
+  <rect x="39" y="97" width="18" height="2.5" rx="1.25" fill="#BDB09A"/>
+  <rect x="29" y="105" width="28" height="2.5" rx="1.25" fill="#E4D7BB"/>
+
+  <!-- desktop with a toast notification -->
+  <rect x="160" y="28" width="68" height="48" rx="4" fill="#2B2623"/>
+  <rect x="164" y="32" width="60" height="40" rx="2" fill="#FCEFD4"/>
+  <rect x="190" y="36" width="31" height="19" rx="3" fill="#FFFFFF" stroke="#E4D7BB"/>
+  <circle cx="196" cy="43" r="3" fill="#D26645"/>
+  <rect x="201" y="41.5" width="15" height="2.5" rx="1.25" fill="#2B2623"/>
+  <rect x="193" y="48" width="23" height="2" rx="1" fill="#BDB09A"/>
+  <rect x="190" y="76" width="10" height="9" fill="#2B2623"/>
+  <rect x="180" y="85" width="30" height="4" rx="2" fill="#2B2623"/>
+
+  <!-- the server, with a bell -->
+  <rect x="102" y="62" width="36" height="36" rx="8" fill="#D26645"/>
+  <g transform="translate(120 80) scale(0.2) translate(-108 -105)">
+    <path d="M106 37.5C111.5 37 115.8 41 115.4 46C115 50.6 111 53.6 106.2 53.2C101.3 52.9 97.6 49.4 97.9 44.9C98.2 40.6 101.4 37.9 106 37.5Z M105 52C82 53 66.5 70 64.2 96C62.4 118 58 132 46.5 143.6C43 147.6 45.8 152.4 51 152.3C90 154.2 128 153.4 165.4 150.2C171.2 149.8 173.4 145 169.2 141C157.4 129.4 152.4 116.4 151 95C149.2 68 132.4 51 105 52Z M92.4 152.5C93.6 165.2 101.2 173.4 110.4 172.2C120.2 171 127.2 163.4 127.4 151.2Z" fill="#FCEFD4"/>
+  </g>
+
+  <!-- Live: direct, dashed -->
+  <path d="M76 80H102M138 80H160" stroke="#D26645" stroke-width="2" stroke-dasharray="4 3" stroke-linecap="round"/>
+  <text x="89" y="73" font-family="sans-serif" font-size="8" font-weight="bold" fill="#8A6A55" text-anchor="middle">Live</text>
+
+  <!-- Push: through a provider in the middle, solid -->
+  <path d="M120 98V118" stroke="#2B2623" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="120" cy="125" r="7" fill="#FCEFD4" stroke="#2B2623" stroke-width="2"/>
+  <path d="M113 125Q86 128 60 138M127 125Q154 128 190 92" stroke="#2B2623" stroke-width="2" stroke-linecap="round" fill="none"/>
+  <text x="120" y="150" font-family="sans-serif" font-size="8" font-weight="bold" fill="#2B2623" text-anchor="middle">Push</text>
+</svg>

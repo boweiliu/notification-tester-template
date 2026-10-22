@@ -13,6 +13,11 @@ ids as ``watched_by``, so the app can show nothing to a user who is already
 reading the chat. When that question cannot be answered in two seconds the
 notification goes out without the field, with a warning on stderr.
 
+A copy also goes to this workspace's notification tester app (``POST /api/chat-notifications``,
+found by its row in the app registry), which sends it on to the user's own phones and desktops
+when its settings say so. The copy is best-effort: when the app is not registered, nothing is
+tried; when it does not answer, a one-line warning goes to stderr; neither changes the exit code.
+
 Exit codes:
     0  -- the app accepted the notification
     1  -- it did not (no gateway env, the app unreachable, a refusal); the
@@ -53,6 +58,7 @@ import importlib.util
 import json
 import os
 import sys
+import tomllib
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -63,6 +69,11 @@ ENV_CHAT_ID = "MINDS_CHAT_ID"
 ENV_GATEWAY = "LATCHKEY_GATEWAY"
 ENV_GATEWAY_PASSWORD = "LATCHKEY_GATEWAY_PASSWORD"
 ENV_GATEWAY_PERMISSIONS = "LATCHKEY_GATEWAY_PERMISSIONS_OVERRIDE"
+ENV_APPS_FILE = "MINDS_APPS_FILE"
+
+# The workspace app that copies each notification on to the user's own devices.
+NOTIFICATION_TESTER_APP_NAME = "notification-tester"
+_COPY_TIMEOUT_SECONDS = 3.0
 
 # One round trip to the desktop app; a wedged app must not stall the agent's
 # turn.
@@ -221,6 +232,54 @@ def notify(
     return False
 
 
+def notification_tester_url(environ: dict[str, str]) -> str | None:
+    """The notification tester's address from the app registry, or None when it is not registered."""
+    apps_file = Path(environ.get(ENV_APPS_FILE) or "data/.state/apps.toml")
+    if not apps_file.is_absolute():
+        apps_file = _REPO_ROOT / apps_file
+    try:
+        rows = tomllib.loads(apps_file.read_text(encoding="utf-8")).get("apps", [])
+    except (OSError, tomllib.TOMLDecodeError):
+        return None
+    for row in rows:
+        if (
+            isinstance(row, dict)
+            and row.get("name") == NOTIFICATION_TESTER_APP_NAME
+            and isinstance(row.get("url"), str)
+        ):
+            return row["url"].rstrip("/")
+    return None
+
+
+def copy_to_notification_tester(
+    message: str, title: str | None, *, http: HttpClient, environ: dict[str, str]
+) -> None:
+    """Hand the notification to the notification tester app, if it is registered; failures only warn."""
+    if not message.strip():
+        return
+    url = notification_tester_url(environ)
+    if url is None:
+        return
+    payload = {
+        "message": message.strip(),
+        "chat_id": environ.get(ENV_CHAT_ID, "") or environ.get(ENV_AGENT_ID, ""),
+    }
+    if title:
+        payload["title"] = title.strip()
+    status, text = http.post_json(
+        f"{url}/api/chat-notifications",
+        payload,
+        {"Content-Type": "application/json"},
+        timeout=_COPY_TIMEOUT_SECONDS,
+    )
+    if status != 201:
+        reason = text if status is None else f"it answered {status}"
+        sys.stderr.write(
+            "notify-user: could not copy the notification to the notification tester "
+            f"({reason.strip()[:200]})\n"
+        )
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Notify the user from this chat through the Imbue Studio app."
@@ -230,9 +289,10 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("message", help="One sentence summarizing what was done")
     args = parser.parse_args(argv)
-    is_accepted = notify(
-        args.message, args.title, http=HttpClient(), environ=dict(os.environ)
-    )
+    http = HttpClient()
+    environ = dict(os.environ)
+    is_accepted = notify(args.message, args.title, http=http, environ=environ)
+    copy_to_notification_tester(args.message, args.title, http=http, environ=environ)
     if is_accepted:
         sys.stderr.write("notify-user: notification sent.\n")
     return 0 if is_accepted else 1
